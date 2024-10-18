@@ -7,4 +7,4 @@ class Itinerary(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     description = models.TextField()
-    ai_generated_itinerary = models.TextField()
+    ai_generated_itinerary = models.TextField(blank=True, null=True)
