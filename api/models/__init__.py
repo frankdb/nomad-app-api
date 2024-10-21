@@ -1,2 +1,2 @@
-from .user import *
-from .itinerary import *
+from .user import CustomUser
+from .itinerary import Itinerary
