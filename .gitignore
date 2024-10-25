@@ -16,7 +16,8 @@ env/
 ENV/
 
 # IDEs
-.vscode/
+.vscode/*
+!.vscode/settings.json
 .idea/
 
 # OS generated files
@@ -39,4 +40,3 @@ media/
 
 # Database
 *.sqlite3
-
