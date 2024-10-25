@@ -40,3 +40,6 @@ media/
 
 # Database
 *.sqlite3
+
+# PostgreSQL
+postgres_data/
