@@ -17,7 +17,7 @@ class Employer(models.Model):
     company_name = models.CharField(max_length=100)
     description = models.TextField()
     website = models.URLField()
-    logo = models.ImageField(upload_to="employer_logos/", null=True, blank=True)
+    logo_url = models.URLField(max_length=2000, null=True, blank=True)
     location = models.CharField(max_length=100)
 
     def __str__(self):
