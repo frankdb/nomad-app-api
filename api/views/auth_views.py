@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from api.models.job_board import Employer, JobSeeker
 from api.serializers import LoginSerializer, RegisterSerializer, UserSerializer
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,10 @@ class RegisterView(APIView):
 
         if serializer.is_valid():
             user = serializer.save()
+            if user.user_type == "EM":
+                Employer.objects.create(user=user, company_name="Default Company Name")
+            elif user.user_type == "JS":
+                JobSeeker.objects.create(user=user, first_name="Default First Name")
             return Response(
                 {
                     "user": UserSerializer(user).data,

@@ -40,7 +40,6 @@ class Job(models.Model):
     location = models.CharField(max_length=100)
     employment_type = models.CharField(max_length=2, choices=EMPLOYMENT_TYPE_CHOICES)
     posted_date = models.DateTimeField(auto_now_add=True)
-    deadline = models.DateField()
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
