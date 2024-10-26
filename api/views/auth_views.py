@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from api.models.job_board import Employer, JobSeeker
 from api.serializers import LoginSerializer, RegisterSerializer, UserSerializer
@@ -85,3 +86,13 @@ class LogoutView(APIView):
                 {"error": f"An unexpected error occurred: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class CustomTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 200:
+            logger.info(f"Token refreshed successfully for user: {request.user}")
+        else:
+            logger.warning(f"Token refresh failed for user: {request.user}")
+        return response
