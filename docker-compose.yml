@@ -6,9 +6,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: nomad_db
-      POSTGRES_USER: nomad_user
-      POSTGRES_PASSWORD: nomad_password
+      POSTGRES_DB: job_board_db
+      POSTGRES_USER: job_board_user
+      POSTGRES_PASSWORD: job_board_password
     ports:
       - 5432:5432
 volumes:
