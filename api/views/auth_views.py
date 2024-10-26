@@ -20,9 +20,9 @@ class RegisterView(APIView):
         if serializer.is_valid():
             user = serializer.save()
             if user.user_type == "EM":
-                Employer.objects.create(user=user, company_name="Default Company Name")
+                Employer.objects.create(user=user)
             elif user.user_type == "JS":
-                JobSeeker.objects.create(user=user, first_name="Default First Name")
+                JobSeeker.objects.create(user=user)
             return Response(
                 {
                     "user": UserSerializer(user).data,
