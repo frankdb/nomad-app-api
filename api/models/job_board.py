@@ -40,7 +40,7 @@ class Job(models.Model):
     ]
 
     title = models.CharField(max_length=100)
-    slug = models.SlugField(max_length=255, unique=True, blank=True)
+    slug = models.SlugField(max_length=255, unique=True, blank=True, db_index=True)
     employer = models.ForeignKey(Employer, on_delete=models.CASCADE)
     description = models.TextField()
     requirements = models.TextField()
