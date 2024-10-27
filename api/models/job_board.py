@@ -1,4 +1,7 @@
+import uuid
+
 from django.db import models
+from django.utils.text import slugify
 
 from api.models.user import CustomUser
 
@@ -36,6 +39,7 @@ class Job(models.Model):
     ]
 
     title = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=255, unique=True, blank=True)
     employer = models.ForeignKey(Employer, on_delete=models.CASCADE)
     description = models.TextField()
     requirements = models.TextField()
@@ -44,6 +48,16 @@ class Job(models.Model):
     employment_type = models.CharField(max_length=2, choices=EMPLOYMENT_TYPE_CHOICES)
     posted_date = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = self.generate_slug()
+        super().save(*args, **kwargs)
+
+    def generate_slug(self):
+        base_slug = slugify(self.title)
+        unique_id = str(uuid.uuid4())[:8]
+        return f"{base_slug}-{unique_id}"
 
     def __str__(self):
         return f"{self.title} at {self.employer.company_name}"
