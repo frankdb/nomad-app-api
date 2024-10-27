@@ -27,6 +27,7 @@ class JobSerializer(serializers.ModelSerializer):
             "logo_url",
             "posted_date",
             "employment_type",
+            "status",
         ]
         read_only_fields = ["posted_date", "slug", "company_name", "logo_url"]
 

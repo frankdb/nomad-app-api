@@ -1,6 +1,11 @@
 from django.urls import path
 
-from api.views.job_views import JobDetailBySlugView, JobDetailView, JobListCreateView
+from api.views.job_views import (
+    EmployerJobListView,
+    JobDetailBySlugView,
+    JobDetailView,
+    JobListCreateView,
+)
 
 urlpatterns = [
     path("jobs/", JobListCreateView.as_view(), name="job-list-create"),
@@ -10,4 +15,5 @@ urlpatterns = [
         JobDetailBySlugView.as_view(),
         name="job-detail-by-slug",
     ),
+    path("jobs/employer/", EmployerJobListView.as_view(), name="employer-jobs"),
 ]

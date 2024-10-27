@@ -42,9 +42,32 @@ def create_users():
 
 def create_jobs():
     employers = Employer.objects.all()
+    status_choices = [
+        Job.Status.DRAFT,
+        Job.Status.PENDING,
+        Job.Status.EXPIRED,
+        Job.Status.ARCHIVED,
+    ]
+
+    # Calculate date range
+    end_date = django.utils.timezone.now()
+    start_date = end_date - django.utils.timezone.timedelta(days=60)
+
     for employer in employers:
-        num_jobs = random.randint(5, 10)
+        num_jobs = random.randint(11, 15)
         for _ in range(num_jobs):
+            # 80% chance of being active
+            status = (
+                Job.Status.ACTIVE
+                if random.random() < 0.8
+                else random.choice(status_choices)
+            )
+
+            # Generate random datetime between start_date and end_date
+            random_date = start_date + django.utils.timezone.timedelta(
+                seconds=random.randint(0, int((end_date - start_date).total_seconds()))
+            )
+
             Job.objects.create(
                 title=fake.job(),
                 employer=employer,
@@ -53,6 +76,8 @@ def create_jobs():
                 salary=f"${random.randint(30000, 150000)} per year",
                 location=fake.city(),
                 employment_type=random.choice(["FT", "PT", "CT", "IN"]),
+                status=status,
+                posted_date=random_date,
             )
 
 

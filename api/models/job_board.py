@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.utils import timezone
 from django.utils.text import slugify
 
 from api.models.user import CustomUser
@@ -39,6 +40,13 @@ class Job(models.Model):
         ("IN", "Internship"),
     ]
 
+    class Status(models.TextChoices):
+        DRAFT = "DRAFT", "Draft"
+        PENDING = "PENDING", "Pending"
+        ACTIVE = "ACTIVE", "Active"
+        EXPIRED = "EXPIRED", "Expired"
+        ARCHIVED = "ARCHIVED", "Archived"
+
     title = models.CharField(max_length=100)
     slug = models.SlugField(max_length=255, unique=True, blank=True, db_index=True)
     employer = models.ForeignKey(Employer, on_delete=models.CASCADE)
@@ -47,8 +55,15 @@ class Job(models.Model):
     salary = models.CharField(max_length=50, null=True, blank=True)
     location = models.CharField(max_length=100)
     employment_type = models.CharField(max_length=2, choices=EMPLOYMENT_TYPE_CHOICES)
-    posted_date = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(default=True)
+    posted_date = models.DateTimeField(default=timezone.now)
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        default=Status.PENDING,
+    )
+
+    def is_active(self):
+        return self.status == self.Status.ACTIVE
 
     def save(self, *args, **kwargs):
         if not self.slug:

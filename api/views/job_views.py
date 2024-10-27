@@ -73,3 +73,13 @@ class JobDetailBySlugView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = JobSerializer(job)
         return Response(serializer.data)
+
+
+class EmployerJobListView(generics.ListAPIView):
+    serializer_class = JobSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Job.objects.select_related("employer").filter(
+            employer=self.request.user.employer
+        )
