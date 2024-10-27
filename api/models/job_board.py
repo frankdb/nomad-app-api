@@ -7,7 +7,7 @@ from api.models.user import CustomUser
 
 
 class JobSeeker(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
     first_name = models.CharField(max_length=100, blank=True, null=True)
     last_name = models.CharField(max_length=100, blank=True, null=True)
     resume = models.URLField(max_length=2000, null=True, blank=True)
@@ -19,7 +19,7 @@ class JobSeeker(models.Model):
 
 
 class Employer(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
     company_name = models.CharField(max_length=100, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     website = models.URLField(blank=True, null=True)
@@ -31,6 +31,7 @@ class Employer(models.Model):
 
 
 class Job(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     EMPLOYMENT_TYPE_CHOICES = [
         ("FT", "Full-time"),
         ("PT", "Part-time"),
@@ -64,6 +65,7 @@ class Job(models.Model):
 
 
 class Application(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     STATUS_CHOICES = [
         ("P", "Pending"),
         ("R", "Reviewed"),
@@ -79,4 +81,4 @@ class Application(models.Model):
     cover_letter = models.TextField()
 
     def __str__(self):
-        return f"{self.applicant.user.username}'s application for {self.job.title}"
+        return f"{self.applicant.user.email}'s application for {self.job.title}"
