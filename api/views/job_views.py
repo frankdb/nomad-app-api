@@ -22,7 +22,7 @@ class JobListCreateView(generics.ListCreateAPIView):
     pagination_class = CustomPagination
 
     def get_queryset(self):
-        queryset = Job.objects.select_related("employer").all()
+        queryset = Job.objects.select_related("employer").all().order_by("-posted_date")
 
         # Add search functionality
         search = self.request.query_params.get("search", None)
@@ -106,6 +106,8 @@ class EmployerJobListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Job.objects.select_related("employer").filter(
-            employer=self.request.user.employer
+        return (
+            Job.objects.select_related("employer")
+            .filter(employer=self.request.user.employer)
+            .order_by("-posted_date")
         )
