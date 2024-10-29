@@ -16,6 +16,9 @@ from pathlib import Path
 
 import dj_database_url
 import django_heroku
+from dotenv import load_dotenv
+
+load_dotenv()  # Add this before any environment variables are accessed
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -214,3 +217,15 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     # Add your frontend's production URL when you deploy
 ]
+
+# Email settings
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"  # Or your email provider
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# Frontend URL for password reset
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
