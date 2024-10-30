@@ -16,13 +16,23 @@ class CustomPagination(PageNumberPagination):
     max_page_size = 100
 
 
+class EmployerJobListPagination(PageNumberPagination):
+    page_size = 100
+    page_size_query_param = "page_size"
+    max_page_size = 1000
+
+
 class JobListCreateView(generics.ListCreateAPIView):
     queryset = Job.objects.select_related("employer").all()
     serializer_class = JobSerializer
     pagination_class = CustomPagination
 
     def get_queryset(self):
-        queryset = Job.objects.select_related("employer").all().order_by("-posted_date")
+        queryset = (
+            Job.objects.select_related("employer")
+            .filter(status=Job.Status.ACTIVE)
+            .order_by("-posted_date")
+        )
 
         # Add search functionality
         search = self.request.query_params.get("search", None)
@@ -104,6 +114,7 @@ class JobDetailBySlugView(APIView):
 class EmployerJobListView(generics.ListAPIView):
     serializer_class = JobSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = EmployerJobListPagination
 
     def get_queryset(self):
         return (

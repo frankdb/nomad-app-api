@@ -42,9 +42,7 @@ class Job(models.Model):
 
     class Status(models.TextChoices):
         DRAFT = "DRAFT", "Draft"
-        PENDING = "PENDING", "Pending"
         ACTIVE = "ACTIVE", "Active"
-        EXPIRED = "EXPIRED", "Expired"
         ARCHIVED = "ARCHIVED", "Archived"
 
     title = models.CharField(max_length=100)
@@ -53,13 +51,13 @@ class Job(models.Model):
     description = models.TextField()
     requirements = models.TextField()
     salary = models.CharField(max_length=50, null=True, blank=True)
-    location = models.CharField(max_length=100)
+    location = models.CharField(max_length=100, blank=True, null=True, default="Remote")
     employment_type = models.CharField(max_length=2, choices=EMPLOYMENT_TYPE_CHOICES)
     posted_date = models.DateTimeField(default=timezone.now)
     status = models.CharField(
         max_length=10,
         choices=Status.choices,
-        default=Status.PENDING,
+        default=Status.DRAFT,
     )
 
     def is_active(self):

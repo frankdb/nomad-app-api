@@ -26,7 +26,11 @@ class LoginSerializer(serializers.Serializer):
     user_info = serializers.SerializerMethodField(read_only=True)
 
     def get_user(self, obj):
-        return {"email": obj["user"].email, "user_type": obj["user"].user_type}
+        return {
+            "email": obj["user"].email,
+            "user_type": obj["user"].user_type,
+            "id": obj["user"].id,
+        }
 
     def validate(self, data):
         email = data.get("email")

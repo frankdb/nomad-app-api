@@ -44,8 +44,6 @@ def create_jobs():
     employers = Employer.objects.all()
     status_choices = [
         Job.Status.DRAFT,
-        Job.Status.PENDING,
-        Job.Status.EXPIRED,
         Job.Status.ARCHIVED,
     ]
 
@@ -56,7 +54,7 @@ def create_jobs():
     for employer in employers:
         num_jobs = random.randint(11, 15)
         for _ in range(num_jobs):
-            # 80% chance of being active
+            # 80% chance of being active (simulating paid posts)
             status = (
                 Job.Status.ACTIVE
                 if random.random() < 0.8
@@ -83,10 +81,12 @@ def create_jobs():
 
 def create_applications():
     job_seekers = JobSeeker.objects.all()
-    jobs = Job.objects.all()
+    # Only allow applications to ACTIVE jobs
+    active_jobs = Job.objects.filter(status=Job.Status.ACTIVE)
+
     for job_seeker in job_seekers:
         num_applications = random.randint(2, 5)
-        applied_jobs = random.sample(list(jobs), num_applications)
+        applied_jobs = random.sample(list(active_jobs), num_applications)
         for job in applied_jobs:
             Application.objects.create(
                 job=job,

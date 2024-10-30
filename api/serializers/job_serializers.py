@@ -29,7 +29,14 @@ class JobSerializer(serializers.ModelSerializer):
             "employment_type",
             "status",
         ]
-        read_only_fields = ["posted_date", "slug", "company_name", "logo_url"]
+        read_only_fields = [
+            "id",
+            "posted_date",
+            "slug",
+            "company_name",
+            "logo_url",
+            "status",
+        ]
 
     def create(self, validated_data):
         validated_data["employer"] = self.context["request"].user.employer
