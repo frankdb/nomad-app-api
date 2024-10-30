@@ -59,6 +59,12 @@ class Job(models.Model):
         choices=Status.choices,
         default=Status.DRAFT,
     )
+    application_url = models.URLField(
+        max_length=2000,
+        null=True,
+        blank=True,
+        help_text="URL for external applications",
+    )
 
     def is_active(self):
         return self.status == self.Status.ACTIVE
@@ -86,6 +92,9 @@ class Application(models.Model):
         ("A", "Accepted"),
         ("D", "Declined"),
     ]
+
+    class Meta:
+        unique_together = ("job", "applicant")
 
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     applicant = models.ForeignKey(JobSeeker, on_delete=models.CASCADE)

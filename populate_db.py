@@ -76,6 +76,8 @@ def create_jobs():
                 employment_type=random.choice(["FT", "PT", "CT", "IN"]),
                 status=status,
                 posted_date=random_date,
+                # 50% chance of having an application URL
+                application_url=fake.url() if random.random() < 0.5 else None,
             )
 
 

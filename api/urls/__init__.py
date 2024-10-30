@@ -4,4 +4,5 @@ urlpatterns = [
     path("", include("api.urls.auth_urls")),
     path("", include("api.urls.job_urls")),
     path("", include("api.urls.order_urls")),
+    path("", include("api.urls.application_urls")),
 ]

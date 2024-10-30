@@ -12,6 +12,9 @@ class EmployerSerializer(serializers.ModelSerializer):
 class JobSerializer(serializers.ModelSerializer):
     company_name = serializers.CharField(source="employer.company_name", read_only=True)
     logo_url = serializers.URLField(source="employer.logo_url", read_only=True)
+    application_url = serializers.URLField(
+        required=False, allow_null=True, allow_blank=True
+    )
 
     class Meta:
         model = Job
@@ -28,6 +31,7 @@ class JobSerializer(serializers.ModelSerializer):
             "posted_date",
             "employment_type",
             "status",
+            "application_url",
         ]
         read_only_fields = [
             "id",
