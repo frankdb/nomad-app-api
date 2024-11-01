@@ -1,9 +1,17 @@
+import logging
+
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.models import Application, Job
 from api.serializers.application_serializers import ApplicationSerializer
+from api.utils.email_utils import (
+    send_application_confirmation_email,
+    send_employer_notification_email,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class ApplicationCreateView(generics.CreateAPIView):
@@ -48,4 +56,23 @@ class ApplicationCreateView(generics.CreateAPIView):
             applicant=request.user.jobseeker,
             status="P",  # Set initial status to Pending
         )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        response = Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        if response.status_code == status.HTTP_201_CREATED:
+            application = Application.objects.get(id=response.data["id"])
+
+            # Send confirmation email to applicant
+            try:
+                send_application_confirmation_email(application)
+            except Exception as e:
+                # Log the error but don't fail the request
+                logger.error(f"Failed to send application confirmation email: {str(e)}")
+
+            # Send notification to employer
+            try:
+                send_employer_notification_email(application)
+            except Exception as e:
+                # Log the error but don't fail the request
+                logger.error(f"Failed to send employer notification email: {str(e)}")
+
+        return response

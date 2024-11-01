@@ -70,7 +70,9 @@ ROOT_URLCONF = "job_board.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [
+            os.path.join(BASE_DIR, "api/templates"),
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -220,12 +222,12 @@ CORS_ALLOWED_ORIGINS = [
 
 # Email settings
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"  # Or your email provider
+EMAIL_HOST = "smtp.resend.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_HOST_USER = os.environ.get("RESEND_USERNAME")
+EMAIL_HOST_PASSWORD = os.environ.get("RESEND_API_KEY")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 
 # Frontend URL for password reset
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
