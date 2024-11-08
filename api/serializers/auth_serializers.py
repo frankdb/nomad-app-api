@@ -8,11 +8,10 @@ from api.models import CustomUser
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    user_type = serializers.ChoiceField(choices=CustomUser.USER_TYPE_CHOICES)
 
     class Meta:
         model = CustomUser
-        fields = ["email", "password", "user_type"]
+        fields = ["email", "password"]
 
     def create(self, validated_data):
         return CustomUser.objects.create_user(**validated_data)
@@ -69,3 +68,7 @@ class ResetPasswordConfirmSerializer(serializers.Serializer):
     def validate_new_password(self, value):
         validate_password(value)
         return value
+
+
+class SetUserTypeSerializer(serializers.Serializer):
+    user_type = serializers.ChoiceField(choices=CustomUser.USER_TYPE_CHOICES)

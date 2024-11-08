@@ -23,6 +23,7 @@ from api.serializers.auth_serializers import (
     ChangePasswordSerializer,
     ResetPasswordConfirmSerializer,
     ResetPasswordEmailSerializer,
+    SetUserTypeSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -248,3 +249,33 @@ class GoogleLoginView(SocialLoginView):
                 {"error": "Failed to process Google login"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class SetUserTypeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if request.user.user_type:
+            return Response(
+                {"error": "User type already set"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = SetUserTypeSerializer(data=request.data)
+        if serializer.is_valid():
+            user_type = serializer.validated_data["user_type"]
+            request.user.user_type = user_type
+            request.user.save()
+
+            if user_type == "EM":
+                Employer.objects.create(user=request.user)
+            elif user_type == "JS":
+                JobSeeker.objects.create(user=request.user)
+
+            return Response(
+                {
+                    "message": "User type set successfully",
+                    "user": UserSerializer(request.user).data,
+                }
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

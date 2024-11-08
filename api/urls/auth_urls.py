@@ -6,6 +6,7 @@ from api.views.auth_views import (
     GoogleLoginView,
     ResetPasswordConfirmView,
     ResetPasswordEmailView,
+    SetUserTypeView,
 )
 
 urlpatterns = [
@@ -21,4 +22,5 @@ urlpatterns = [
         name="reset-password-confirm",
     ),
     path("auth/google/", GoogleLoginView.as_view(), name="google-login"),
+    path("user/type/", SetUserTypeView.as_view(), name="set-user-type"),
 ]
