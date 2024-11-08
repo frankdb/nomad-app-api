@@ -1,5 +1,9 @@
 import logging
+import secrets
 
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from dj_rest_auth.registration.views import SocialLoginView
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
@@ -11,6 +15,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
+from api.models.auth import PasswordResetToken
 from api.models.job_board import Employer, JobSeeker
 from api.models.user import CustomUser
 from api.serializers import LoginSerializer, RegisterSerializer, UserSerializer
@@ -138,8 +143,12 @@ class ResetPasswordEmailView(APIView):
             email = serializer.data["email"]
             try:
                 user = CustomUser.objects.get(email=email)
-                token = default_token_generator.make_token(user)
-                reset_url = f"{settings.FRONTEND_URL}/reset-password?token={token}"
+                token = secrets.token_urlsafe(32)
+
+                # Create password reset token
+                reset_token = PasswordResetToken.objects.create(user=user, token=token)
+
+                reset_url = f"{settings.FRONTEND_URL}/reset-password/{token}"
 
                 send_mail(
                     "Password Reset Request",
@@ -150,26 +159,92 @@ class ResetPasswordEmailView(APIView):
                 )
                 return Response({"message": "Password reset email sent"})
             except CustomUser.DoesNotExist:
-                # Return success even if email doesn't exist for security
                 return Response({"message": "Password reset email sent"})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ResetPasswordConfirmView(APIView):
     def post(self, request):
-        serializer = ResetPasswordConfirmSerializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                user = CustomUser.objects.get(email=request.data.get("email"))
-                if default_token_generator.check_token(user, serializer.data["token"]):
-                    user.set_password(serializer.data["new_password"])
-                    user.save()
-                    return Response({"message": "Password reset successful"})
+        try:
+            token = request.data.get("token")
+            reset_token = PasswordResetToken.objects.get(token=token)
+
+            if not reset_token.is_valid:
                 return Response(
-                    {"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
+                    {"error": "Token has expired or already been used"},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-            except CustomUser.DoesNotExist:
-                return Response(
-                    {"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
-                )
+
+            serializer = ResetPasswordConfirmSerializer(data=request.data)
+            if serializer.is_valid():
+                user = reset_token.user
+                user.set_password(serializer.data["new_password"])
+                user.save()
+
+                # Mark token as used
+                reset_token.used = True
+                reset_token.save()
+
+                return Response({"message": "Password reset successful"})
+
+        except PasswordResetToken.DoesNotExist:
+            return Response(
+                {"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GoogleLoginView(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+    callback_url = settings.FRONTEND_URL
+    client_class = OAuth2Client
+
+    def post(self, request, *args, **kwargs):
+        try:
+            # Process the social login
+            response = super().post(request, *args, **kwargs)
+
+            if response.status_code == 200:
+                # Extract user from response data
+                user_data = response.data.get("user", {})
+                email = user_data.get("email")
+
+                # Check if user exists
+                try:
+                    user = CustomUser.objects.get(email=email)
+                except CustomUser.DoesNotExist:
+                    # Create new user
+                    user = CustomUser.objects.create(
+                        email=email,
+                        user_type="JS",  # Default to JobSeeker
+                        is_active=True,
+                    )
+                    # Create JobSeeker profile
+                    JobSeeker.objects.create(
+                        user=user,
+                        first_name=user_data.get("first_name", ""),
+                        last_name=user_data.get("last_name", ""),
+                    )
+
+                # Generate JWT tokens
+                refresh = RefreshToken.for_user(user)
+
+                return Response(
+                    {
+                        "user": UserSerializer(user).data,
+                        "tokens": {
+                            "refresh": str(refresh),
+                            "access": str(refresh.access_token),
+                        },
+                    }
+                )
+
+            return response
+
+        except Exception as e:
+            logger.error(f"Google login error: {str(e)}")
+            return Response(
+                {"error": "Failed to process Google login"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

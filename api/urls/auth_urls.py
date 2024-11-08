@@ -3,6 +3,7 @@ from django.urls import path
 from api.views import CustomTokenRefreshView, LoginView, LogoutView, RegisterView
 from api.views.auth_views import (
     ChangePasswordView,
+    GoogleLoginView,
     ResetPasswordConfirmView,
     ResetPasswordEmailView,
 )
@@ -19,4 +20,5 @@ urlpatterns = [
         ResetPasswordConfirmView.as_view(),
         name="reset-password-confirm",
     ),
+    path("auth/google/", GoogleLoginView.as_view(), name="google-login"),
 ]
